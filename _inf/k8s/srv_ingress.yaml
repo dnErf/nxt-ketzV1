@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: srv-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/use-regex: 'true'
+spec:
+  rules:
+    - host: vdbx.dev
+      http:
+        paths:
+          - path: /api/?(.*)
+            backend:
+              serviceName: serv-ketzv1-core
+              servicePort: 9998
+          - path: /?(.*)
+            backend:
+              serviceName: serv-ketzv1-client
+              servicePort: 9999
+              

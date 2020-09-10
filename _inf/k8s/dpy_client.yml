@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dpy-ketzv1-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ketzv1-client
+  template:
+    metadata:
+      labels:
+        app: ketzv1-client
+    spec:
+      containers:
+        - name: ketzv1-client
+          image: us.gcr.io/vdbx-dev/client
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: serv-ketzv1-client
+spec:
+  selector:
+    app: ketzv1-client
+  ports:
+  - name: ketzv1-client
+    protocol: TCP
+    port: 9999
+    targetPort: 9999

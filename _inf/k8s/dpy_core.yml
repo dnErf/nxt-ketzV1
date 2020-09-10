@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dpy-ketzv1-core
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ketzv1-core
+  template:
+    metadata:
+      labels:
+        app: ketzv1-core
+    spec:
+      containers:
+        - name: ketzv1-core
+          image: us.gcr.io/vdbx-dev/core
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: serv-ketzv1-core
+spec:
+  selector:
+    app: ketzv1-core
+  ports:
+  - name: ketzv1-core
+    protocol: TCP
+    port: 9998
+    targetPort: 9998

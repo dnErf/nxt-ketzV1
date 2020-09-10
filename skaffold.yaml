@@ -1,0 +1,31 @@
+apiVersion: skaffold/v2beta7
+kind: Config
+deploy:
+  kubectl:
+    manifests:
+      - ./_inf/k8s/*
+build:
+  # > to build local < 
+  # local:
+  #   push: false
+  googleCloudBuild:
+    projectId: vdbx-dev
+  artifacts:
+    - image: us.gcr.io/vdbx-dev/client
+      context: client
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'server/**/*.ts'
+            dest: .
+          - src: '**/*.tsx'
+            dest: .
+    - image: us.gcr.io/vdbx-dev/core
+      context: core
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .
