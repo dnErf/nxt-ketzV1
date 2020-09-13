@@ -1,5 +1,9 @@
+import jwt from 'jsonwebtoken';
 import express, { Request, Response} from 'express';
 import { body, validationResult } from 'express-validator';
+import { BadRequest } from '@ketketz/common';
+// ---
+import { User } from '../models/user'
 
 let router = express.Router();
 
@@ -13,16 +17,27 @@ let validator = [
     .withMessage('password must be between 4 and 20 characters')
 ];
 
-router.post('api/users/signup', validator, (req:Request, res:Response) => {
-  let err = validationResult(req);
-
-  if (!err.isEmpty()) {
-    return res.status(400).send(err.array())
-  }
+router.post('api/users/signup', validator, async (req:Request, res:Response) => {
 
   let { email, password } = req.body;
+  let isExistingUser = await User.findOne({ email });
 
-  res.send({});
+  if (isExistingUser) {
+    throw new BadRequest('email is in use')
+  }
+
+  let user = User.build({ email, password });
+  await user.save();
+
+  let userJwt = jwt.sign(
+    { id: user.id, email: user.email }, process.env.JWT
+  );
+
+  req.session = {
+    jwt: userJwt
+  };
+
+  res.status(201).send(user);
 });
 
 export { router as signupRoute };

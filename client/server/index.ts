@@ -1,6 +1,9 @@
+import cookieSession from 'cookie-session';
 import express from 'express';
+import mongoose from 'mongoose';
 import next from 'next';
 import { json } from 'body-parser';
+// ---
 import { ErrorHandler } from '@ketketz/common'
 // ---
 import { signedRoute } from './routes/signed';
@@ -17,7 +20,15 @@ app.prepare().then(() => {
 
   const server = express();
 
+  server.use('trust proxy', true);
   server.use(json());
+  server.use(
+    cookieSession({
+      signed: false,
+      secure: process.env.NODE_ENV !== 'test'
+    })
+  );
+
   server.use(signedRoute);
   server.use(signinRoute);
   server.use(signoutRoute);
@@ -29,9 +40,21 @@ app.prepare().then(() => {
 
   server.use(ErrorHandler);
 
-  server.listen(port, () => {
-    console.log(`> Ready on http://localhost:${port}`);
-  });
+  (async () => {
+    try {
+      await mongoose.connect('mongodb://serv-ketzv1-client-mongo:27017/auth', {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useCreateIndex: true
+      });
+      server.listen(port, () => {
+        console.log(`> Ready on http://localhost:${port}`);
+      });
+    }
+    catch (err) {
+      console.error(err)
+    }
+  })(); 
 
 });
 
