@@ -1,4 +1,4 @@
-// [lup:20091201]
+// [lup:20091301]
 // [errors]
 export * from './errors/_custom_error';
 export * from './errors/bad_request';
@@ -7,3 +7,4 @@ export * from './errors/request_validation_error';
 
 // [express middlewares]
 export * from './middlewares/error_handler';
+export * from './middlewares/validate_request';

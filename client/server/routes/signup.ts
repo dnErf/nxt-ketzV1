@@ -1,13 +1,14 @@
 import jwt from 'jsonwebtoken';
-import express, { Request, Response} from 'express';
+import express, { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
-import { BadRequest } from '@ketketz/common';
+import { BadRequest, ValidateRequest } from '@ketketz/common';
 // ---
 import { User } from '../models/user'
 
 let router = express.Router();
 
-let validator = [
+const Route = 'api/users/signup';
+const Validator = [
   body('email')
     .isEmail()
     .withMessage('email must be valid'),
@@ -17,27 +18,31 @@ let validator = [
     .withMessage('password must be between 4 and 20 characters')
 ];
 
-router.post('api/users/signup', validator, async (req:Request, res:Response) => {
+router.post(
+  Route, 
+  Validator, 
+  ValidateRequest, 
+  async (req:Request, res:Response) => {
+    let { email, password } = req.body;
+    let isExistingUser = await User.findOne({ email });
 
-  let { email, password } = req.body;
-  let isExistingUser = await User.findOne({ email });
+    if (isExistingUser) {
+      throw new BadRequest('email is in use')
+    }
 
-  if (isExistingUser) {
-    throw new BadRequest('email is in use')
+    let user = User.build({ email, password });
+    await user.save();
+
+    let userJwt = jwt.sign(
+      { id: user.id, email: user.email }, process.env.JWT
+    );
+
+    req.session = {
+      jwt: userJwt
+    };
+
+    res.status(201).send(user);
   }
-
-  let user = User.build({ email, password });
-  await user.save();
-
-  let userJwt = jwt.sign(
-    { id: user.id, email: user.email }, process.env.JWT
-  );
-
-  req.session = {
-    jwt: userJwt
-  };
-
-  res.status(201).send(user);
-});
+);
 
 export { router as signupRoute };

@@ -8,7 +8,7 @@ export const ErrorHandler = (err:Error, req:Request, res:Response, next:NextFunc
   else {
     res.status(400).send({
       errors: [{ message: 'something went wrong with server request'}]
-    })
+    });
   }
   return;
 }
