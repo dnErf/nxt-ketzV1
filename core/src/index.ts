@@ -1,12 +1,17 @@
-import express from 'express'
-import { json } from 'body-parser'
+import mongoose from 'mongoose';
+import { server } from './server'
 
-let app = express()
+(async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useCreateIndex: true
+     });
+    server.listen(9998, () => console.log('core at port 9998'))
+  }
+  catch (err) {
+    console.error(err);
+  }
+})();
 
-app.use(json())
-
-app.get('/api/tests', (req, res) => {
-  res.send('hello gcloud kubernetes')
-})
-
-app.listen(9998, () => console.log('listening on port 9998'))

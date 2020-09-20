@@ -15,6 +15,14 @@ spec:
       containers:
         - name: ketzv1-core
           image: us.gcr.io/vdbx-dev/core
+          env:
+            - name: MONGO_URI
+              value: 'mongodb://serv-ketzv1-core-mongo:27017/core'
+            - name: JWT
+              valueFrom:
+                secretKeyRef:
+                  name: secret-ketz-jwt
+                  key: jwt
 ---
 apiVersion: v1
 kind: Service

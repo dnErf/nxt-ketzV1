@@ -16,7 +16,7 @@
     ]
   },
   "dependencies": {
-    "@ketketz/common": "^0.1.4",
+    "@ketketz/common": "^0.1.5",
     "@types/cookie-session": "^2.0.41",
     "@types/express": "^4.17.7",
     "@types/jsonwebtoken": "^8.5.0",
