@@ -2,6 +2,7 @@
 // [errors]
 export * from './errors/_custom_error';
 export * from './errors/bad_request';
+export * from './errors/not_authorized';
 export * from './errors/not_found';
 export * from './errors/request_validation_error';
 
