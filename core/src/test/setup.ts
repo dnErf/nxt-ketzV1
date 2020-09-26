@@ -6,7 +6,7 @@ import { server } from '../server';
 declare global {
   namespace NodeJS {
     interface Global {
-      signin():Promise<string[]>;
+      signin():string[];
     }
   }
 }
@@ -40,14 +40,21 @@ afterAll(async () => {
   await mongoose.connection.close();
 });
 
-global.signin = async () => {
-  let email = 'test@mail.com';
-  let password = 'password';
-  let response = await request(server)
-    .post('/api/users/signup')
-    .send({ email, password })
-    .expect(201);
-  let cookie = response.get('Set-Cookie');
-  return cookie;
-}
+global.signin = () => {
+  // Build a JWT payload.  { id, email }
+  let payload = {
+    id: new mongoose.Types.ObjectId().toHexString(),
+    email: 'test@test.com',
+  };
+  // Create the JWT!
+  let token = jwt.sign(payload, process.env.JWT_KEY!);
+  // Build session Object. { jwt: MY_JWT }
+  let session = { jwt: token };
+  // Turn that session into JSON
+  let sessionJSON = JSON.stringify(session);
+  // Take JSON and encode it as base64
+  let base64 = Buffer.from(sessionJSON).toString('base64');
+  // return a string thats the cookie with the encoded data
+  return [`express:sess=${base64}`];
+};
 

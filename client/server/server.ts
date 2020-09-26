@@ -11,7 +11,8 @@ import { signupRoute } from './routes/signup';
 
 const server = express();
 
-server.use('trust proxy', true);
+server.set('trust proxy', true);
+
 server.use(json());
 server.use(
   cookieSession({
