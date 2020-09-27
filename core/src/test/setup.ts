@@ -11,6 +11,8 @@ declare global {
   }
 }
 
+jest.mock('./mocks');
+
 let mongo:any;
 
 beforeAll(async () => {
