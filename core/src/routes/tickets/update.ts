@@ -1,7 +1,11 @@
 import { Request, Response } from 'express';
 import { BadRequest, NotAuthorized, NotFound } from '@ketketz/common';
+// ---
+import { TicketUpdatedPublisher } from '../../events/publishers';
+import { natsWrapper } from '../../nats';
 
 const updateById = async (req:Request, res:Response) => {
+
   let ticket = await Ticket.findById(req.params.id);
 
   if (!ticket) 
@@ -16,7 +20,17 @@ const updateById = async (req:Request, res:Response) => {
     price: req.body.price,
   });
   await ticket.save();
+
+  new TicketUpdatedPublisher(natsWrapper.client).publish({
+    id: ticket.id,
+    title: ticket.title,
+    price: ticket.price,
+    userId: ticket.userId,
+    version: ticket.version,
+  });
+
   res.send(ticket);
+  
 }
 
 export { updateById }
