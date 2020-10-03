@@ -1,4 +1,4 @@
-import { Publisher, Subjects, TicketUpdatedEvent } from '@ketketz/common';
+import { Publisher, Subjects, TicketCreatedEvent, TicketUpdatedEvent } from '@ketketz/common';
 
 export class TicketCreatedPublisher extends Publisher<TicketCreatedEvent> {
   readonly subject = Subjects.TicketCreated;

@@ -6,28 +6,26 @@ interface UserPayload {
   email: string;
 }
 
-interface RequestSession extends Request {
-  session?: {
-    jwt:string;
-  };
-}
-
 declare global {
   namespace Express {
     interface Request {
-      currentUser?: UserPayload;
+      currentUser?:UserPayload;
+      session?: {
+        jwt?:string;
+      }
     }
   }
 }
 
-export const CurrentUser = (req:RequestSession, res:Response, next:NextFunction) => {
+export const CurrentUser = (req:Request, res:Response, next:NextFunction) => {
 
   if (!req.session?.jwt) {
     return next();
   }
 
   try {
-    req.currentUser = jwt.verify(req.session?.jwt, process.env.JWT_KEY!) as UserPayload;
+    const payload = jwt.verify(req.session.jwt, process.env.JWT_KEY!) as UserPayload;
+    req.currentUser = payload;
   } 
   catch (err) {
   }

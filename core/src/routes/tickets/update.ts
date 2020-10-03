@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { BadRequest, NotAuthorized, NotFound } from '@ketketz/common';
 // ---
+import { Ticket } from '../../models/ticket';
 import { TicketUpdatedPublisher } from '../../events/publishers';
 import { natsWrapper } from '../../nats';
 
