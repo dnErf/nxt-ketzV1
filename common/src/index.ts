@@ -9,6 +9,7 @@ export * from './errors/request_validation_error';
 // [express middlewares]
 export * from './middlewares/current_user';
 export * from './middlewares/error_handler';
+export * from './middlewares/require_auth';
 export * from './middlewares/validate_request';
 
 // [nats streaming]
