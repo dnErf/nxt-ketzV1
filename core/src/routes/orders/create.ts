@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { BadRequest, NotFound } from '@ketketz/common';
 import { Order } from '../../models/order';
 import { Ticket } from '../../models/order_ticket';
+import { OrderCreatedPublisher } from '../../events/publishers';
 
 const EXPIRATION_WINDOW_SECONDS = 1 * 60;
 
@@ -32,6 +33,18 @@ export const createNew = async (req:Request, res:Response) => {
     ticket,
   });
   await order.save();
+
+  new OrderCreatedPublisher(natsWrapper.client).publish({
+    id: order.id,
+    version: order.version,
+    status: order.status,
+    userId: order.userId,
+    expiresAt: order.expiresAt.toISOString(),
+    ticket: {
+      id: ticket.id,
+      price: ticket.price,
+    },
+  });
 
   res.status(201).send(order);
 }
