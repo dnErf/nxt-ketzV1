@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { natsWrapper } from './nats';
-import { server } from './server'
+import { server } from './server';
+import { TicketCreatedListener, TicketUpdatedListener } from './events/listeners';
 
 (async () => {
   try {
@@ -15,6 +16,8 @@ import { server } from './server'
     });
     process.on('SIGINT', () => natsWrapper.client.close());
     process.on('SIGTERM', () => natsWrapper.client.close());
+    new TicketCreatedListener(natsWrapper.client).listen();
+    new TicketUpdatedListener(natsWrapper.client).listen();
     await mongoose.connect(process.env.MONGO_URI, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
