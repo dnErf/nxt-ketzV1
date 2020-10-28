@@ -24,7 +24,7 @@ spec:
   selector:
     app: ketzv1-core-mongo
   ports:
-    - name: db
+    - name: core-mongo
       protocol: TCP
       port: 27017
       targetPort: 27017

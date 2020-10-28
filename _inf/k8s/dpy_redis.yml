@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dpy-redis-bull
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-bull
+  template:
+    metadata:
+      labels:
+        app: redis-bull
+    spec:
+      containers:
+        - name: redis-bull
+          image: redis
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: srv-redis-bull
+spec:
+  selector:
+    app: redis-bull
+  ports:
+    - name: redis-bull
+      protocol: TCP
+      port: 6379
+      targetPort: 6379
