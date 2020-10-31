@@ -1,9 +1,41 @@
+import 
+{ Subjects, Listener, TicketCreatedEvent, OrderCreatedEvent, OrderCancelledEvent, ExpirationCompleteEvent } 
+from '@ketketz/common';
 import { Message } from 'node-nats-streaming';
-import { Subjects, Listener, TicketCreatedEvent, OrderCreatedEvent, OrderCancelledEvent } from '@ketketz/common';
 import { Ticket } from '../models/ticket';
 import { Ticket as TicketOrder } from '../models/order_ticket';
 import { queueOrderService, queueTicketService } from './queue_group';
 import { TicketUpdatedPublisher } from './publishers';
+
+export class ExpirationCompleteListener extends Listener<ExpirationCompleteEvent> {
+  subject: Subjects.ExpirationComplete = Subjects.ExpirationComplete;
+  queueGroupName = queueOrderService;
+
+  async onMessage(data: ExpirationCompleteEvent['data'], msg: Message) {
+    let order = await TicketOrder.findById(data.orderId).populate('ticket');
+
+    if (!order) {
+      throw new Error('Order not found');
+    }
+    if (order.status === OrderStatus.Complete) {
+      return msg.ack();
+    }
+
+    order.set({
+      status: OrderStatus.Cancelled,
+    });
+    await order.save();
+    await new OrderCancelledPublisher(this.client).publish({
+      id: order.id,
+      version: order.version,
+      ticket: {
+        id: order.ticket.id,
+      },
+    });
+
+    msg.ack();
+  }
+}
 
 export class OrderCreatedListener extends Listener<OrderCreatedEvent> {
   subject: Subjects.OrderCreated = Subjects.OrderCreated;
@@ -11,7 +43,7 @@ export class OrderCreatedListener extends Listener<OrderCreatedEvent> {
 
   async onMessage(data: OrderCreatedEvent['data'], msg: Message) {
     // Find the ticket that the order is reserving
-    const ticket = await Ticket.findById(data.ticket.id);
+    let ticket = await Ticket.findById(data.ticket.id);
 
     // If no ticket, throw error
     if (!ticket) {
@@ -42,7 +74,7 @@ export class OrderCancelledListener extends Listener<OrderCancelledEvent> {
   queueGroupName = queueGroupName;
 
   async onMessage(data: OrderCancelledEvent['data'], msg: Message) {
-    const ticket = await Ticket.findById(data.ticket.id);
+    let ticket = await Ticket.findById(data.ticket.id);
 
     if (!ticket) {
       throw new Error('Ticket not found');

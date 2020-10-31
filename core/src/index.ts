@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 import { natsWrapper } from './nats';
 import { server } from './server';
-import { TicketCreatedListener, TicketUpdatedListener } from './events/listeners';
+import { ExpirationCompleteListener } from './events/listeners';
 import { OrderCancelledListener, OrderCreatedListener } from './events/listeners';
+import { TicketCreatedListener, TicketUpdatedListener } from './events/listeners';
 
 (async () => {
   try {
@@ -17,6 +18,7 @@ import { OrderCancelledListener, OrderCreatedListener } from './events/listeners
     });
     process.on('SIGINT', () => natsWrapper.client.close());
     process.on('SIGTERM', () => natsWrapper.client.close());
+    new ExpirationCompleteListener(natsWrapper.client).listen();
     new OrderCreatedListener(natsWrapper.client).listen();
     new OrderCancelledListener(natsWrapper.client).listen();
     new TicketCreatedListener(natsWrapper.client).listen();

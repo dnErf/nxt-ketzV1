@@ -1,4 +1,4 @@
-// [lup:20101901]
+// [lup:20103101]
 // [errors]
 export * from './errors/_custom_error';
 export * from './errors/bad_request';
@@ -17,6 +17,7 @@ export * from './stan/base_listener';
 export * from './stan/base_publisher';
 export * from './stan/enum_subjects';
 export * from './stan/enum_order_status';
+export * from './stan/events_expiration';
 export * from './stan/events_order';
 export * from './stan/events_ticket';
 
