@@ -2,6 +2,7 @@ import cookieSession from 'cookie-session';
 import express from 'express';
 import { json } from 'body-parser';
 import { CurrentUser, ErrorHandler, NotFound } from '@ketketz/common';
+import { paymentChargeRouter } from './routes/payments'
 // ---
 
 const server = express();
@@ -17,9 +18,7 @@ server.use(
 );
 
 server.use(CurrentUser);
-
-server.use(orderRoute);
-server.use(ticketRoute);
+server.use(paymentChargeRouter);
 
 server.all('*', (req, res) => {
   throw new NotFound();

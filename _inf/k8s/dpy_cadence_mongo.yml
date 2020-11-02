@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dpy-ketzv1-cadence-mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ketzv1-cadence-mongo
+  template:
+    metadata:
+      labels:
+        app: ketzv1-cadence-mongo
+    spec:
+      containers:
+        - name: ketzv1-cadence-mongo
+          image: mongo
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: serv-ketzv1-cadence-mongo
+spec:
+  selector:
+    app: ketzv1-cadence-mongo
+  ports:
+    - name: cadence-mongo
+      protocol: TCP
+      port: 27017
+      targetPort: 27017

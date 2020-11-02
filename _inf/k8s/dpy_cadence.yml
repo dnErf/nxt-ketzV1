@@ -33,6 +33,11 @@ spec:
               value: ketketz
             - name: REDIS_HOST
               value: srv-redis-bull
+            - name: STRIPE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: secret-ketz-stripe
+                  key: STRIPE_KEY
 ---
 apiVersion: v1
 kind: Service

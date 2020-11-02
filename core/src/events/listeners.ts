@@ -1,11 +1,31 @@
 import 
-{ Subjects, Listener, TicketCreatedEvent, OrderCreatedEvent, OrderCancelledEvent, ExpirationCompleteEvent } 
+  { Subjects, Listener, TicketCreatedEvent, OrderCreatedEvent, OrderCancelledEvent, ExpirationCompleteEvent } 
 from '@ketketz/common';
 import { Message } from 'node-nats-streaming';
 import { Ticket } from '../models/ticket';
 import { Ticket as TicketOrder } from '../models/order_ticket';
 import { queueOrderService, queueTicketService } from './queue_group';
 import { TicketUpdatedPublisher } from './publishers';
+
+export class PaymentCreatedListener extends Listener<PaymentCreatedEvent> {
+  subject: Subjects.PaymentCreated = Subjects.PaymentCreated;
+  queueGroupName = queueOrderService;
+
+  async onMessage(data: PaymentCreatedEvent['data'], msg: Message) {
+    let order = await TicketOrder.findById(data.orderId);
+
+    if (!order) {
+      throw new Error('Order not found');
+    }
+
+    order.set({
+      status: OrderStatus.Complete,
+    });
+    await order.save();
+
+    msg.ack();
+  }
+}
 
 export class ExpirationCompleteListener extends Listener<ExpirationCompleteEvent> {
   subject: Subjects.ExpirationComplete = Subjects.ExpirationComplete;
@@ -42,18 +62,15 @@ export class OrderCreatedListener extends Listener<OrderCreatedEvent> {
   queueGroupName = queueTicketService;
 
   async onMessage(data: OrderCreatedEvent['data'], msg: Message) {
-    // Find the ticket that the order is reserving
+    
     let ticket = await Ticket.findById(data.ticket.id);
 
-    // If no ticket, throw error
     if (!ticket) {
       throw new Error('Ticket not found');
     }
 
-    // Mark the ticket as being reserved by setting its orderId property
     ticket.set({ orderId: data.id });
 
-    // Save the ticket
     await ticket.save();
     await new TicketUpdatedPublisher(this.client).publish({
       id: ticket.id,
@@ -64,7 +81,6 @@ export class OrderCreatedListener extends Listener<OrderCreatedEvent> {
       version: ticket.version,
     });
 
-    // ack the message
     msg.ack();
   }
 }
