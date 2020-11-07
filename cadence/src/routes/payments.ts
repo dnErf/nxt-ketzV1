@@ -1,4 +1,4 @@
-import { requireAuth, validateRequest, OrderStatus } from '@ketketz/common';
+import { RequireAuth, ValidateRequest, OrderStatus } from '@ketketz/common';
 import { BadRequest, NotAuthorized, NotFound } from '@ketketz/common';
 import express, { Request, Response } from 'express';
 import { body } from 'express-validator';
@@ -11,19 +11,19 @@ import { natsWrapper } from '../nats';
 const router = express.Router();
 const validator = [ body('token').not().isEmpty(), body('orderId').not().isEmpty() ];
 
-router.post('/api/payments', requireAuth, validator, validateRequest, async (req: Request, res: Response) => {
+router.post('/api/payments', RequireAuth, validator, ValidateRequest, async (req: Request, res: Response) => {
 
     let { token, orderId } = req.body;
     let order = await Order.findById(orderId);
 
     if (!order) {
-      throw new NotFoundError();
+      throw new NotFound();
     }
     if (order.userId !== req.currentUser!.id) {
-      throw new NotAuthorizedError();
+      throw new NotAuthorized();
     }
     if (order.status === OrderStatus.Cancelled) {
-      throw new BadRequestError('Cannot pay for an cancelled order');
+      throw new BadRequest('Cannot pay for an cancelled order');
     }
 
     let charge = await stripe.charges.create({

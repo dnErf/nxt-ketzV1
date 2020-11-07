@@ -1,18 +1,20 @@
 import 
-  { Subjects, Listener, TicketCreatedEvent, OrderCreatedEvent, OrderCancelledEvent, ExpirationCompleteEvent } 
+  { Subjects, Listener, OrderStatus, TicketCreatedEvent, TicketUpdatedEvent, ExpirationCompleteEvent } 
 from '@ketketz/common';
+import { OrderCreatedEvent, OrderCancelledEvent, PaymentCreatedEvent } from '@ketketz/common'
 import { Message } from 'node-nats-streaming';
+import { Order } from '../models/order';
 import { Ticket } from '../models/ticket';
 import { Ticket as TicketOrder } from '../models/order_ticket';
 import { queueOrderService, queueTicketService } from './queue_group';
-import { TicketUpdatedPublisher } from './publishers';
+import { OrderCancelledPublisher, TicketUpdatedPublisher } from './publishers';
 
 export class PaymentCreatedListener extends Listener<PaymentCreatedEvent> {
   subject: Subjects.PaymentCreated = Subjects.PaymentCreated;
   queueGroupName = queueOrderService;
 
   async onMessage(data: PaymentCreatedEvent['data'], msg: Message) {
-    let order = await TicketOrder.findById(data.orderId);
+    let order = await Order.findById(data.orderId);
 
     if (!order) {
       throw new Error('Order not found');
@@ -32,7 +34,7 @@ export class ExpirationCompleteListener extends Listener<ExpirationCompleteEvent
   queueGroupName = queueOrderService;
 
   async onMessage(data: ExpirationCompleteEvent['data'], msg: Message) {
-    let order = await TicketOrder.findById(data.orderId).populate('ticket');
+    let order = await Order.findById(data.orderId).populate('ticket');
 
     if (!order) {
       throw new Error('Order not found');
@@ -87,7 +89,7 @@ export class OrderCreatedListener extends Listener<OrderCreatedEvent> {
 
 export class OrderCancelledListener extends Listener<OrderCancelledEvent> {
   subject: Subjects.OrderCancelled = Subjects.OrderCancelled;
-  queueGroupName = queueGroupName;
+  queueGroupName = queueTicketService;
 
   async onMessage(data: OrderCancelledEvent['data'], msg: Message) {
     let ticket = await Ticket.findById(data.ticket.id);

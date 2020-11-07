@@ -7,23 +7,27 @@ const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
-app.prepare().then(() => {
+app.prepare().then(async () => {
 
-  (async () => {
-    try {
-      await mongoose.connect('mongodb://serv-ketzv1-client-mongo:27017/auth', {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        useCreateIndex: true
-      });
-      server.listen(port, () => {
-        console.log(`> Ready on http://localhost:${port}`);
-      });
-    }
-    catch (err) {
-      console.error(err)
-    }
-  })(); 
+  try {
+    await mongoose.connect('mongodb://serv-ketzv1-client-mongo:27017/auth', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true
+    });
+    server.all('*', (req, res) => {
+      return handle(req, res);
+    });
+    server.listen(port, () => {
+      console.log(`> Ready on http://localhost:${port}`);
+    });
+  }
+  catch (err) {
+    console.error(err)
+  }
+
+  // (async () => {
+  // })(); 
 
 });
 

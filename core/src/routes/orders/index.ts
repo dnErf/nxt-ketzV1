@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import express, { Request, Response} from 'express';
 import { body, validationResult } from 'express-validator';
-import { RequireAuth, ValidateRequest, BadRequest, ValidateRequest } from '@ketketz/common';
+import { RequireAuth, ValidateRequest, BadRequest } from '@ketketz/common';
 // ---
 import { createNew } from './create'
 import { getAll, getById } from './get'

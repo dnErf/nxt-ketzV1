@@ -19,11 +19,8 @@ const Validator = [
     .withMessage('password must be between 4 and 20 characters')
 ];
 
-router.get(
-  Route,
-  Validator,
-  ValidateRequest, 
-  (req, res) => {
+router.get(Route, Validator, ValidateRequest, async (req, res) => {
+
     let { email, password } = req.body;
     let existingUser = await User.findOne({ email });
 
@@ -38,7 +35,7 @@ router.get(
     }
 
     let userJwt = jwt.sign(
-      { id: user.id, email: user.email }, process.env.JWT
+      { id: existingUser.id, email: existingUser.email }, process.env.JWT
     );
 
     req.session = {

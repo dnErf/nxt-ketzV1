@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
-import { BadRequest, NotFound } from '@ketketz/common';
+import { BadRequest, NotFound, OrderStatus } from '@ketketz/common';
+// ---
+import { natsWrapper } from '../../nats';
 import { Order } from '../../models/order';
 import { Ticket } from '../../models/order_ticket';
 import { OrderCreatedPublisher } from '../../events/publishers';

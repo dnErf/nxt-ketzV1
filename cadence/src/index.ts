@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { natsWrapper } from './nats';
 import { server } from './server';
+import { OrderCreatedListener, OrderCancelledListener } from './events/listeners';
 
 (async () => {
   try {
@@ -15,6 +16,7 @@ import { server } from './server';
     });
     process.on('SIGINT', () => natsWrapper.client.close());
     process.on('SIGTERM', () => natsWrapper.client.close());
+    new OrderCancelledListener(natsWrapper.client).listen();
     new OrderCreatedListener(natsWrapper.client).listen();
     await mongoose.connect(process.env.MONGO_URI, {
         useNewUrlParser: true,

@@ -26,10 +26,6 @@ server.use(signinRoute);
 server.use(signoutRoute);
 server.use(signupRoute);
 
-server.all('*', (req, res) => {
-  return handle(req, res);
-});
-
 server.use(ErrorHandler);
 
 export { server };
